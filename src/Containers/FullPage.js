@@ -9,6 +9,7 @@ import ListGroup from "react-bootstrap/ListGroup"
 import CloseButton from "react-bootstrap/CloseButton"
 import Row from "react-bootstrap/Row"
 import Alert from "react-bootstrap/Alert"
+import Spinner from "react-bootstrap/Spinner"
 import PostRequest from "../Utils/PostRequest"
 
 export default function FullPage() {
@@ -27,6 +28,9 @@ export default function FullPage() {
 	const [recipients, setRecipients] = useState([])
 
 	const [error, setError] = useState("")
+	const [success, setSuccess] = useState(false)
+	const [loading, setLoading] = useState(false)
+	const [disabled, setDisabled] = useState(false)
 
 	const compileBody = () => {
 		const body = {
@@ -94,6 +98,8 @@ export default function FullPage() {
 											onChange={(e) => {
 												setMainUserName(e.target.value)
 												setMainUserDetailSave(false)
+												setDisabled(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingNameMain">Name</label>
@@ -108,6 +114,8 @@ export default function FullPage() {
 											onChange={(e) => {
 												setMainUserEmail(e.target.value)
 												setMainUserDetailSave(false)
+												setDisabled(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingEmailMain">Email address</label>
@@ -167,6 +175,7 @@ export default function FullPage() {
 											onChange={(e) => {
 												setEmailSubject(e.target.value)
 												setEmailDetailSave(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingSubjectMain">Subject</label>
@@ -180,6 +189,8 @@ export default function FullPage() {
 											onChange={(e) => {
 												setEmailTitle(e.target.value)
 												setEmailDetailSave(false)
+												setDisabled(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingTitleMain">Title</label>
@@ -193,6 +204,8 @@ export default function FullPage() {
 											onChange={(e) => {
 												setEmailMessage(e.target.value)
 												setEmailDetailSave(false)
+												setDisabled(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingTitleMain">Message</label>
@@ -251,6 +264,8 @@ export default function FullPage() {
 											placeholder="Enter Your Name"
 											onChange={(e) => {
 												setRecipientName(e.target.value)
+												setDisabled(false)
+												setSuccess(false)
 											}}
 										/>
 										<label htmlFor="floatingNameMain">Name</label>
@@ -263,7 +278,11 @@ export default function FullPage() {
 											id="floatingEmailMain"
 											type="email"
 											placeholder="Enter Email Address"
-											onChange={(e) => setRecipientEmail(e.target.value)}
+											onChange={(e) => {
+												setRecipientEmail(e.target.value)
+												setDisabled(false)
+												setSuccess(false)
+											}}
 										/>
 										<label htmlFor="floatingEmailMain">Email address</label>
 										<Form.Text className="text-muted">
@@ -324,16 +343,32 @@ export default function FullPage() {
 						<Button
 							size="lg"
 							variant="success"
+							disabled={disabled}
 							onClick={() => {
+								setLoading(true)
+								setDisabled(true)
 								const body = compileBody()
 								PostRequest(body).then((response) => {
 									if (response.errors.length > 0) {
 										setError(response)
+										setDisabled(false)
+									} else {
+										setSuccess(true)
 									}
+									setLoading(false)
 								})
 							}}
 						>
-							Send Emails!
+							{loading && (
+								<Spinner
+									as="span"
+									animation="border"
+									role="status"
+									aria-hidden="true"
+								/>
+							)}
+							{!loading && !success && "Send Emails!"}
+							{!loading && success && "Sent"}
 						</Button>
 					)}
 			</Container>
