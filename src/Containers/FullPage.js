@@ -8,6 +8,7 @@ import Card from "react-bootstrap/Card"
 import ListGroup from "react-bootstrap/ListGroup"
 import CloseButton from "react-bootstrap/CloseButton"
 import Row from "react-bootstrap/Row"
+import Alert from "react-bootstrap/Alert"
 import PostRequest from "../Utils/PostRequest"
 
 export default function FullPage() {
@@ -24,6 +25,8 @@ export default function FullPage() {
 	const [recipientName, setRecipientName] = useState("")
 	const [recipientEmail, setRecipientEmail] = useState("")
 	const [recipients, setRecipients] = useState([])
+
+	const [error, setError] = useState("")
 
 	const compileBody = () => {
 		const body = {
@@ -314,19 +317,45 @@ export default function FullPage() {
 					</Card.Body>
 				</Card>
 				<br />
-				{mainUserDetailSave && emailDetailSave && recipients.length > 0 && (
-					<Button
-						size="lg"
-						variant="success"
-						onClick={() => {
-							const body = compileBody()
-							console.log(PostRequest(body))
-						}}
-					>
-						Send Emails!
-					</Button>
-				)}
+				{mainUserDetailSave &&
+					emailDetailSave &&
+					recipients.length > 0 &&
+					!error && (
+						<Button
+							size="lg"
+							variant="success"
+							onClick={() => {
+								const body = compileBody()
+								PostRequest(body).then((response) => {
+									if (response.errors.length > 0) {
+										setError(response)
+									}
+								})
+							}}
+						>
+							Send Emails!
+						</Button>
+					)}
 			</Container>
+			{error && (
+				<Alert
+					className="w-75 m-auto"
+					variant="danger"
+					onClose={() => setError("")}
+					dismissible
+				>
+					<Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+					<p>{error.message}</p>
+					<hr />
+					<ul>
+						{error.errors
+							.filter((x) => x !== 202)
+							.map((item, idx) => (
+								<li key={idx}>{item.error}</li>
+							))}
+					</ul>
+				</Alert>
+			)}
 			<br />
 		</>
 	)

@@ -12,9 +12,5 @@ export default async function PostRequest(body) {
 	const promise = await fetch(url, request)
 	const response = await promise.json()
 
-	if (response.errors.length > 0) {
-		return response
-	} else {
-		return response.message
-	}
+	return response
 }
